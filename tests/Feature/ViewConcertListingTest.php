@@ -16,8 +16,6 @@ class ViewConcertListingTest extends TestCase
 
     public function user_can_view_concert_listing()
     {
-      // Arrange
-      // Create concert model
 
       $concert = Concert::create([
         'title'    => 'The Red Chord',
@@ -32,15 +30,8 @@ class ViewConcertListingTest extends TestCase
         'additional_information' => 'For tickets, call (555) 555-5555.',
       ]);
       
-      
-      // Act 
-      // View concert listing
-
       $response = $this->get('/concerts/'.$concert->id);
       $response->assertStatus(200);
-
-      // Assert
-      // See concert detail
 
       $response->assertSee('The Red Chord');
       $response->assertSee('with Aminosity and Lethargy');
@@ -53,5 +44,16 @@ class ViewConcertListingTest extends TestCase
       $response->assertSee('ON');
       $response->assertSee('17916');
       $response->assertSee('For tickets, call (555) 555-5555.');
+    }
+
+    /** @test */
+
+    public function user_cannot_view_unpublished_concert_listing() {
+      $concert = factory(Concert::class)->create([
+        'published_at' => null,
+        ]);
+
+      $response = $this->get('/concerts/'.$concert->id);
+      $response->assertStatus(404);
     }
 }

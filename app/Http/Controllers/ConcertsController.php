@@ -7,8 +7,7 @@ namespace App\Http\Controllers;
 class ConcertsController extends Controller
 {
   public function show($id) {
-    $concert = \App\Concert::find($id);
-    \Log::debug($concert->id);
+    $concert = \App\Concert::whereNotNull('published_at')->findOrFail($id);
     return view('concerts.show', ['concert' => $concert]);
   }
 }
