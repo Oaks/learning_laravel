@@ -12,3 +12,6 @@
 */
 
 Route::get('/concerts/{id}', 'ConcertsController@show');
+Route::post('/concerts/{id}/orders', 'ConcertOrdersController@store');
+//Route::post('/concerts/{id}/orders', function() { \Log::debug('route orders');
+//} );
