@@ -24,4 +24,19 @@ class Concert extends Model
   public function scopePublished($query) {
     return $query->whereNotNull('published_at');
   }
+
+  public function orders() {
+    return $this->hasMany(Order::class);
+  }
+
+  public function orderTickets($email, $ticketsQuantity) {
+    $order = $this->orders()->create([
+      'email' => $email
+    ]);
+
+    foreach (range(1, $ticketsQuantity) as $i) {
+      $order->tickets()->create([]);
+    }
+    return $order;
+  }
 }
