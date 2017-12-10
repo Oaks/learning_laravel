@@ -31,10 +31,10 @@ class PurchaseTicketsTest extends TestCase
 
     /** @test */
 
-    public function customer_can_purchase_concert_tickets()
+    public function customer_can_purchase_tickets_to_a_published_concert()
     {
 
-      $concert = factory(\App\Concert::class)->create([ 'ticket_price' => 3250 ]);
+      $concert = factory(\App\Concert::class)->states('published')->create([ 'ticket_price' => 3250 ]);
 
       $response = $this->orderTickets($concert,  [
         'email' => 'john@example.com',
@@ -55,7 +55,7 @@ class PurchaseTicketsTest extends TestCase
 
 //      $this->disableExceptionHandling();
 
-      $concert = factory(\App\Concert::class)->create();
+      $concert = factory(\App\Concert::class)->states('published')->create();
 
       
       $response = $this->orderTickets($concert,  [
@@ -72,7 +72,7 @@ class PurchaseTicketsTest extends TestCase
 
 //      $this->disableExceptionHandling();
 
-      $concert = factory(\App\Concert::class)->create();
+      $concert = factory(\App\Concert::class)->states('published')->create();
 
       $response = $this->orderTickets($concert,  [
         'email'=> 'not-email-address',
@@ -89,7 +89,7 @@ class PurchaseTicketsTest extends TestCase
 
 //      $this->disableExceptionHandling();
 
-      $concert = factory(\App\Concert::class)->create();
+      $concert = factory(\App\Concert::class)->states('published')->create();
 
       $response = $this->orderTickets($concert,  [
         'email'=> 'john@example.com',
@@ -105,7 +105,7 @@ class PurchaseTicketsTest extends TestCase
 
 //      $this->disableExceptionHandling();
 
-      $concert = factory(\App\Concert::class)->create();
+      $concert = factory(\App\Concert::class)->states('published')->create();
 
       $response = $this->orderTickets($concert,  [
         'email'=> 'john@example.com',
@@ -120,7 +120,7 @@ class PurchaseTicketsTest extends TestCase
 
   public function payment_token_is_required_to_purchase_tickets() {
 
-      $concert = factory(\App\Concert::class)->create();
+      $concert = factory(\App\Concert::class)->states('published')->create();
 
       $response = $this->orderTickets($concert,  [
         'email'=> 'john@example.com',
@@ -133,7 +133,7 @@ class PurchaseTicketsTest extends TestCase
   /** @test */
 
   public function an_order_is_not_created_if_payment_fails() {
-      $concert = factory(\App\Concert::class)->create();
+      $concert = factory(\App\Concert::class)->states('published')->create();
 
       $response = $this->orderTickets($concert,  [
         'email'=> 'john@example.com',
@@ -145,5 +145,22 @@ class PurchaseTicketsTest extends TestCase
 
       $order = $concert->orders()->where('email', 'john@example.com')->first();
       $this->assertNull($order);
+  }
+
+  /** @test */
+
+  public function cannot_purchase_tickets_to_an_unpublished_concert() {
+
+    $concert = factory(\App\Concert::class)->states('unpublished')->create();
+
+    $response = $this->orderTickets($concert,  [
+      'email'=> 'john@example.com',
+      'ticket_quantity'=> 3,
+      'payment_token' => $this->paymentGateWay->getValidTestToken(),
+      ]);
+
+    $response->assertStatus(404);
+    $this->assertEquals(0, $concert->orders()->count());
+
   }
 }
