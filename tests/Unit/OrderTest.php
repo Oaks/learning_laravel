@@ -12,6 +12,22 @@ class OrderTest extends TestCase
 
     /** @test  */
 
+    public function converting_to_an_array() {
+      $concert = factory(\App\Concert::class)->create(['ticket_price' => 1200]);
+      $concert->addTickets(5);
+      $order = $concert->orderTickets('jane@example.com', 5);
+
+      $result = $order->toArray();
+
+      $this->assertEquals([
+        'email' => 'jane@example.com',
+        'ticket_quantity' =>5,
+        'amount' => 6000
+      ], $result);
+    }
+
+    /** @test  */
+
     public function tickets_are_released_when_an_order_is_cancelled() {
       $concert = factory(\App\Concert::class)->create();
       $concert->addTickets(10);
