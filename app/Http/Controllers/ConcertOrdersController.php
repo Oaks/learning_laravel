@@ -29,9 +29,11 @@ class ConcertOrdersController extends Controller
 
     try {
       $tickets = $concert->findTickets( request('ticket_quantity'));
-      $this->paymentGateWay->charge($tickets->sum('price'), request('payment_token'));
+      $reservation = new \App\Reservation($tickets);
 
-      $order = Order::forTickets($tickets, request('email'), $tickets->sum('price'));
+      $this->paymentGateWay->charge($reservation->totalCost(), request('payment_token'));
+
+      $order = Order::forTickets($tickets, request('email'), $reservation->totalCost());
 
       return response()->json($order->toArray(), 201);
     }
